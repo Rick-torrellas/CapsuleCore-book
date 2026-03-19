@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación de Clase: Relation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Clase <code>Relation</code></h1>
+            <p class="subtitle">Define vínculos direccionales y semánticos entre diferentes entidades del sistema.</p>
+        </header>
+
+        <section class="definition">
+            <h2>Definición</h2>
+            <p>La clase <code>Relation</code> permite establecer un puente entre dos objetos identificables, especificando la naturaleza de su conexión mediante un tipo definido.</p>
+        </section>
+
+        <section class="attributes">
+            <h2>Atributos de Datos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Atributo</th>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>from_id</code></td>
+                        <td><code>str</code></td>
+                        <td>El identificador del objeto de origen (sujeto).</td>
+                    </tr>
+                    <tr>
+                        <td><code>to_id</code></td>
+                        <td><code>str</code></td>
+                        <td>El identificador del objeto de destino (objeto).</td>
+                    </tr>
+                    <tr>
+                        <td><code>connection_type</code></td>
+                        <td><code>str</code></td>
+                        <td>Cadena que describe la lógica de la unión (ej. <em>"referencia"</em>, <em>"depende de"</em>).</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="usage-note">
+            <h2>Notas de Implementación</h2>
+            <p>A diferencia de <code>Entry</code>, esta clase es una representación pura de datos (Data Transfer Object) diseñada para grafos de conocimiento o trazabilidad de dependencias.</p>
+        </section>
+    </div>
+</body>
+</html>
