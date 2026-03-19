@@ -1,5 +1,7 @@
 from src.CapsuleCore_book.capsule.CodexService import CodexService
-from src.CapsuleCore_book.capsule.SQLiteKnowledgeRepository import SQLiteKnowledgeRepository
+from src.CapsuleCore_book.capsule.SQLiteKnowledgeRepository import (
+    SQLiteKnowledgeRepository,
+)
 
 
 # Asumiendo que tienes la estructura de carpetas:
@@ -20,15 +22,15 @@ try:
     # CASO DE USO 1: Crear nuevas páginas de conocimiento
     print("\n[1] Creando entradas...")
     p1 = service.create_page(
-        title="Arquitectura Hexagonal", 
+        title="Arquitectura Hexagonal",
         content="Diseño que aísla el core de la infraestructura mediante puertos y adaptadores.",
-        tags=["Arquitectura", "Diseño", "Software"]
+        tags=["Arquitectura", "Diseño", "Software"],
     )
-    
+
     p2 = service.create_page(
-        title="SQLite", 
+        title="SQLite",
         content="Base de datos relacional ligera contenida en un solo archivo.",
-        tags=["Base de Datos", "SQL", "Ligero"]
+        tags=["Base de Datos", "SQL", "Ligero"],
     )
 
     # CASO DE USO 2: Editar una página existente
@@ -45,7 +47,9 @@ try:
     print("\n[4] Buscando por tag 'Software'...")
     resultados = repo.find_by_tag("Software")
     for res in resultados:
-        print(f" - Encontrado: {res.title} (Ediciones: {res.metadata.get('edit_count', 0)})")
+        print(
+            f" - Encontrado: {res.title} (Ediciones: {res.metadata.get('edit_count', 0)})"
+        )
 
     # CASO DE USO 5: Borrado
     # print("\n[5] Borrando entrada...")

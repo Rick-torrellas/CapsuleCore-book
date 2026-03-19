@@ -1,4 +1,4 @@
-from .core import Entry,Relation
+from .core import Entry, Relation
 from .capsule import CodexService
 
-__all__ = ["Entry","Relation","CodexService"]
+__all__ = ["Entry", "Relation", "CodexService"]

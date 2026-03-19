@@ -5,6 +5,7 @@ from typing import List, Optional
 from ..core import Entry, Relation
 from .KnowledgeRepository import KnowledgeRepository
 
+
 class SQLiteKnowledgeRepository(KnowledgeRepository):
     def __init__(self, db_path: str = "codex.db"):
         self.db_path = db_path
@@ -44,7 +45,8 @@ class SQLiteKnowledgeRepository(KnowledgeRepository):
     def save(self, entry: Entry) -> None:
         """Upsert: Crea o actualiza la entrada completa."""
         with self._get_connection() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO entries (id, title, content, tags, created_at, updated_at, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
@@ -53,36 +55,47 @@ class SQLiteKnowledgeRepository(KnowledgeRepository):
                     tags=excluded.tags,
                     updated_at=excluded.updated_at,
                     metadata=excluded.metadata
-            """, (
-                entry.id, entry.title, entry.content, 
-                json.dumps(entry.tags), 
-                entry.created_at.isoformat(),
-                entry.updated_at.isoformat() if entry.updated_at else None,
-                json.dumps(entry.metadata)
-            ))
+            """,
+                (
+                    entry.id,
+                    entry.title,
+                    entry.content,
+                    json.dumps(entry.tags),
+                    entry.created_at.isoformat(),
+                    entry.updated_at.isoformat() if entry.updated_at else None,
+                    json.dumps(entry.metadata),
+                ),
+            )
 
     def delete(self, entry_id: str) -> bool:
         """Elimina una entrada y sus relaciones asociadas."""
         with self._get_connection() as conn:
             cursor = conn.execute("DELETE FROM entries WHERE id = ?", (entry_id,))
             # También limpiamos las relaciones donde participaba esta entrada
-            conn.execute("DELETE FROM relations WHERE from_id = ? OR to_id = ?", (entry_id, entry_id))
+            conn.execute(
+                "DELETE FROM relations WHERE from_id = ? OR to_id = ?",
+                (entry_id, entry_id),
+            )
             return cursor.rowcount > 0
 
     def get_by_id(self, entry_id: str) -> Optional[Entry]:
         with self._get_connection() as conn:
-            row = conn.execute("SELECT * FROM entries WHERE id = ?", (entry_id,)).fetchone()
+            row = conn.execute(
+                "SELECT * FROM entries WHERE id = ?", (entry_id,)
+            ).fetchone()
             if not row:
                 return None
-            
+
             return Entry(
                 id=row["id"],
                 title=row["title"],
                 content=row["content"],
                 tags=json.loads(row["tags"]),
                 created_at=datetime.fromisoformat(row["created_at"]),
-                updated_at=datetime.fromisoformat(row["updated_at"]) if row["updated_at"] else None,
-                metadata=json.loads(row["metadata"])
+                updated_at=datetime.fromisoformat(row["updated_at"])
+                if row["updated_at"]
+                else None,
+                metadata=json.loads(row["metadata"]),
             )
 
     def find_by_tag(self, tag: str) -> List[Entry]:
@@ -90,26 +103,32 @@ class SQLiteKnowledgeRepository(KnowledgeRepository):
         with self._get_connection() as conn:
             # Usamos LIKE para buscar dentro del string JSON de tags
             search_pattern = f'%"{tag.lower().strip()}"%'
-            rows = conn.execute("SELECT * FROM entries WHERE tags LIKE ?", (search_pattern,)).fetchall()
-            
+            rows = conn.execute(
+                "SELECT * FROM entries WHERE tags LIKE ?", (search_pattern,)
+            ).fetchall()
+
             entries = []
             for row in rows:
-                entries.append(Entry(
-                    id=row["id"],
-                    title=row["title"],
-                    content=row["content"],
-                    tags=json.loads(row["tags"]),
-                    created_at=datetime.fromisoformat(row["created_at"]),
-                    updated_at=datetime.fromisoformat(row["updated_at"]) if row["updated_at"] else None,
-                    metadata=json.loads(row["metadata"])
-                ))
+                entries.append(
+                    Entry(
+                        id=row["id"],
+                        title=row["title"],
+                        content=row["content"],
+                        tags=json.loads(row["tags"]),
+                        created_at=datetime.fromisoformat(row["created_at"]),
+                        updated_at=datetime.fromisoformat(row["updated_at"])
+                        if row["updated_at"]
+                        else None,
+                        metadata=json.loads(row["metadata"]),
+                    )
+                )
             return entries
 
     def add_relation(self, relation: Relation) -> None:
         with self._get_connection() as conn:
             conn.execute(
                 "INSERT OR IGNORE INTO relations (from_id, to_id, connection_type) VALUES (?, ?, ?)",
-                (relation.from_id, relation.to_id, relation.connection_type)
+                (relation.from_id, relation.to_id, relation.connection_type),
             )
 
     def remove_relation(self, relation: Relation) -> None:
@@ -117,5 +136,5 @@ class SQLiteKnowledgeRepository(KnowledgeRepository):
         with self._get_connection() as conn:
             conn.execute(
                 "DELETE FROM relations WHERE from_id = ? AND to_id = ? AND connection_type = ?",
-                (relation.from_id, relation.to_id, relation.connection_type)
+                (relation.from_id, relation.to_id, relation.connection_type),
             )

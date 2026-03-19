@@ -16,7 +16,7 @@ class KnowledgeRepository(ABC):
     @abstractmethod
     def find_by_tag(self, tag: str) -> List[Entry]:
         pass
-    
+
     @abstractmethod
     def delete(self, entry_id: str) -> bool:
         """Elimina una entrada por su ID."""
