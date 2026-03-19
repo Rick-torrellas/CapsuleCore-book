@@ -21,6 +21,8 @@ class CodexService:
     def _normalize_tags(self, entry: Entry):
         """Regla interna: Limpieza de etiquetas."""
         entry.tags = list(set(t.lower().strip() for t in entry.tags))
+        return entry
+
 
     def create_page(self, title: str, content: str, tags: List[str] = None) -> Entry:
         """Caso de Uso: Crear un nuevo conocimiento con reglas de validación."""
@@ -28,10 +30,8 @@ class CodexService:
             raise ValueError("El título no puede estar vacío.")
             
         new_entry = Entry(title=title, content=content, tags=tags or [])
-        self._normalize_tags(new_entry)
-        
-        self.repository.save(new_entry)
-        return new_entry
+    
+        return self.ingest(new_entry)
 
     def edit_page(self, entry_id: str, new_content: str):
         """Caso de Uso: Editar contenido y actualizar metadatos de auditoría."""
@@ -62,3 +62,22 @@ class CodexService:
 
         relation = Relation(from_id=from_id, to_id=to_id, connection_type=connection_type)
         self.repository.add_relation(relation)      
+    def delete_page(self, entry_id: str):
+        """Elimina una página y limpia sus conexiones para mantener la integridad."""
+        if not self.repository.get_by_id(entry_id):
+            raise ValueError(f"No se puede eliminar: la página {entry_id} no existe.")
+        
+        # 1. Limpiar relaciones (Dependiendo de tu repo, esto podría ser automático)
+        self.repository.remove_all_relations_to(entry_id)
+        
+        # 2. Borrar la entidad
+        self.repository.delete(entry_id)
+    def disconnect_pages(self, from_id: str, to_id: str, connection_type: str = None):
+        """Rompe el vínculo entre dos páginas."""
+        # Podrías filtrar por connection_type si permites múltiples tipos entre nodos
+        relation_exists = self.repository.check_relation(from_id, to_id, connection_type)
+        
+        if not relation_exists:
+            raise ValueError("No existe una relación previa entre estas páginas.")
+            
+        self.repository.remove_relation(from_id, to_id, connection_type)
