@@ -27,7 +27,6 @@ jobs:
 
       - name: Publish to GitHub Packages
         run: |
-          uv publish \
-            --publish-url https://pypi.pkg.github.com/${{ github.repository_owner }} \
-            --username ${{ github.actor }} \
-            --password ${{ secrets.GITHUB_TOKEN }}
+          run: uv publish --publish-url https://pypi.pkg.github.com/Rick-torrellas/${{ github.event.repository.name }}
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
