@@ -3,64 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation | ShellBack Library</title>
+    <title>Relation Dataclass Documentation</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
 </head>
 <body id="repository">
 
     <aside class="sidebar">
-        <h2>Architecture</h2>
+        <h2>Models</h2>
         <nav>
-            <a href="#" class="active">Repository Interface</a>
-            <a href="#">Adapters</a>
-            <a href="#">Entities</a>
+            <a href="#" class="active">Relation</a>
+            <a href="#">Node</a>
+            <a href="#">Graph</a>
         </nav>
-
-        <h2 style="margin-top: 2rem;">Modules</h2>
+        <h2 style="margin-top: 2rem;">API Reference</h2>
         <nav>
-            <a href="#">Core Log Engine</a>
-            <a href="#">ShellBack</a>
-            <a href="#">Web Components</a>
+            <a href="#">Authentication</a>
+            <a href="#">Endpoints</a>
         </nav>
     </aside>
 
     <main class="main-content">
         <header>
-            <h1>Repository</h1>
-            <p class="subtitle">Definición de la interfaz abstracta para la persistencia de datos.</p>
+            <h1>Relation</h1>
+            <p class="subtitle">An immutable data structure representing a directional link between two entities.</p>
         </header>
 
         <section>
             <h2>Overview</h2>
-            <p>
-                Esta interfaz define el contrato que deben seguir todos los adaptadores de persistencia. 
-                Sigue el principio de inversión de dependencia para mantener el núcleo de la aplicación 
-                aislado de detalles de implementación como bases de datos o sistemas de archivos.
-            </p>
-        </section>
-
-        <section>
-            <h2>Methods</h2>
+            <p>The <code>Relation</code> class is a frozen dataclass used to define how different IDs within the system interact with one another. Since it is marked as <code>frozen=True</code>, instances are hashable and their attributes cannot be modified after creation.</p>
             
-            <div class="method-card">
-                <h3>save(entity: Entity): void</h3>
-                <p>Persiste una nueva entidad en el sistema de almacenamiento configurado.</p>
-            </div>
-
-            <div class="method-card">
-                <h3>get_by_id(id: string): Entity</h3>
-                <p>Recupera una entidad específica utilizando su identificador único.</p>
-            </div>
-
-            <div class="method-card">
-                <h3>delete(id: string): boolean</h3>
-                <p>Elimina una entrada del repositorio. Retorna <code>true</code> si la operación fue exitosa.</p>
+            <div class="method-box" style="margin-top: 1.5rem;">
+                <strong>Python Definition:</strong><br>
+                <code>@dataclass(frozen=True) class Relation:</code>
             </div>
         </section>
 
         <section>
-            <h2>Data Structure</h2>
+            <h2>Attributes</h2>
             <table>
                 <thead>
                     <tr>
@@ -71,29 +50,37 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><code>id</code></td>
-                        <td>String</td>
-                        <td>Identificador único autogenerado (UUID).</td>
+                        <td><code>from_id</code></td>
+                        <td>string</td>
+                        <td>The unique identifier of the source entity.</td>
                     </tr>
                     <tr>
-                        <td><code>created_at</code></td>
-                        <td>DateTime</td>
-                        <td>Marca de tiempo de la creación del registro.</td>
+                        <td><code>to_id</code></td>
+                        <td>string</td>
+                        <td>The unique identifier of the target entity.</td>
                     </tr>
                     <tr>
-                        <td><code>payload</code></td>
-                        <td>Object</td>
-                        <td>Datos específicos de la entidad.</td>
+                        <td><code>connection_type</code></td>
+                        <td>string</td>
+                        <td>The nature of the link (e.g., "reference", "depends_on", "contradicts").</td>
                     </tr>
                 </tbody>
             </table>
         </section>
 
         <section>
-            <h2>Usage Example</h2>
-            <div class="method-box">
-                <p>Para implementar un nuevo adaptador, hereda de esta clase en tu capa de infraestructura:</p>
-                <code>class SQLRepository(Repository): ...</code>
+            <h2>Implementation Examples</h2>
+            
+            <div class="method-card">
+                <h3>Instantiating a Dependency</h3>
+                <p><code>rel = Relation(from_id="A", to_id="B", connection_type="depends_on")</code></p>
+                <p style="margin-top: 0.5rem; color: #64748b;">Creates a one-way dependency where A relies on B.</p>
+            </div>
+
+            <div class="method-card">
+                <h3>Logical Contradiction</h3>
+                <p><code>rel = Relation(from_id="arg_1", to_id="arg_2", connection_type="contradicts")</code></p>
+                <p style="margin-top: 0.5rem; color: #64748b;">Used to map conflicting data points in a knowledge graph.</p>
             </div>
         </section>
     </main>
