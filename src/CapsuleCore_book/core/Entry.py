@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, Any
 import uuid
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Entry:
     content: str
     title: Optional[str] = None
@@ -14,6 +14,15 @@ class Entry:
     updated_at: Optional[datetime] = None
     # El diccionario de metadatos para flexibilidad total
     metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self):
+        # Normalizar título: quitar espacios laterales
+        if self.title:
+            self.title = self.title.strip()
+        
+        # Normalizar tags: minúsculas, sin espacios y sin duplicados
+        if self.tags:
+            self.tags = list(set(t.lower().strip() for t in self.tags))
 
     def update_content(self, new_content: str):
         self.content = new_content
