@@ -1,12 +1,5 @@
-from .CodexService import CodexService
 from .Lexicon import Lexicon
-from .SQLiteAdapter import SQLiteAdapter
-from .OrjsonAdapter import OrjsonAdapter
+from .JSONLexicon import JSONLexicon
+from .UJSONLexicon import UJSONLexicon
 
-
-__all__ = [
-    "CodexService",
-    "Lexicon",
-    "SQLiteAdapter",
-    "OrjsonAdapter",
-]
+__all__ = ["Lexicon", "JSONLexicon", "UJSONLexicon"]
