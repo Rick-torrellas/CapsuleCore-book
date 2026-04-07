@@ -27,7 +27,7 @@ class ORJSONLexicon(Lexicon):
         try:
             with open(self.storage_path, "rb") as f:
                 return orjson.loads(f.read())
-        except (orjson.JSONDecodeError, FileNotFoundError):
+        except orjson.JSONDecodeError, FileNotFoundError:
             return {"entries": {}, "relations": []}
 
     def _write_data(self, data: Dict):
@@ -38,10 +38,7 @@ class ORJSONLexicon(Lexicon):
         """
         with open(self.storage_path, "wb") as f:
             # orjson retorna bytes, por eso abrimos el archivo en modo 'wb'
-            f.write(orjson.dumps(
-                data, 
-                option=orjson.OPT_INDENT_2 | orjson.OPT_UTC_Z
-            ))
+            f.write(orjson.dumps(data, option=orjson.OPT_INDENT_2 | orjson.OPT_UTC_Z))
 
     # --- Implementación del Puerto Lexicon ---
 
@@ -77,21 +74,31 @@ class ORJSONLexicon(Lexicon):
     def save_relation(self, relation: Relation) -> None:
         data = self._read_data()
         if not self._check_relation_in_data(data, relation):
-            data["relations"].append({
-                "from_id": relation.from_id,
-                "to_id": relation.to_id,
-                "connection_type": relation.connection_type,
-                "metadata": relation.metadata,
-            })
+            data["relations"].append(
+                {
+                    "from_id": relation.from_id,
+                    "to_id": relation.to_id,
+                    "connection_type": relation.connection_type,
+                    "metadata": relation.metadata,
+                }
+            )
             self._write_data(data)
 
     def get_in_relations(self, entry_id: str) -> List[Relation]:
         data = self._read_data()
-        return [self._map_to_relation(r) for r in data["relations"] if r["to_id"] == entry_id]
+        return [
+            self._map_to_relation(r)
+            for r in data["relations"]
+            if r["to_id"] == entry_id
+        ]
 
     def get_out_relations(self, entry_id: str) -> List[Relation]:
         data = self._read_data()
-        return [self._map_to_relation(r) for r in data["relations"] if r["from_id"] == entry_id]
+        return [
+            self._map_to_relation(r)
+            for r in data["relations"]
+            if r["from_id"] == entry_id
+        ]
 
     def delete(self, entry_id: str) -> bool:
         data = self._read_data()
@@ -99,7 +106,8 @@ class ORJSONLexicon(Lexicon):
             return False
 
         data["relations"] = [
-            r for r in data["relations"] 
+            r
+            for r in data["relations"]
             if r["from_id"] != entry_id and r["to_id"] != entry_id
         ]
         del data["entries"][entry_id]
@@ -113,17 +121,26 @@ class ORJSONLexicon(Lexicon):
     def get_by_ids(self, entry_ids: List[str]) -> List[Entry]:
         data = self._read_data()
         return [
-            self._map_to_entry(data["entries"][eid]) 
-            for eid in entry_ids if eid in data["entries"]
+            self._map_to_entry(data["entries"][eid])
+            for eid in entry_ids
+            if eid in data["entries"]
         ]
 
     def get_by_tag(self, tag: str) -> List[Entry]:
         data = self._read_data()
-        return [self._map_to_entry(e) for e in data["entries"].values() if tag in e.get("tags", [])]
+        return [
+            self._map_to_entry(e)
+            for e in data["entries"].values()
+            if tag in e.get("tags", [])
+        ]
 
     def get_by_category(self, category: str) -> List[Entry]:
         data = self._read_data()
-        return [self._map_to_entry(e) for e in data["entries"].values() if e.get("category") == category]
+        return [
+            self._map_to_entry(e)
+            for e in data["entries"].values()
+            if e.get("category") == category
+        ]
 
     def get_by_date_range(self, start: datetime, end: datetime) -> List[Entry]:
         data = self._read_data()
@@ -135,13 +152,19 @@ class ORJSONLexicon(Lexicon):
                 results.append(self._map_to_entry(e))
         return results
 
-    def delete_relation(self, from_id: str, to_id: str, connection_type: Optional[str] = None) -> bool:
+    def delete_relation(
+        self, from_id: str, to_id: str, connection_type: Optional[str] = None
+    ) -> bool:
         data = self._read_data()
         initial_count = len(data["relations"])
         data["relations"] = [
-            r for r in data["relations"]
-            if not (r["from_id"] == from_id and r["to_id"] == to_id and 
-                   (connection_type is None or r["connection_type"] == connection_type))
+            r
+            for r in data["relations"]
+            if not (
+                r["from_id"] == from_id
+                and r["to_id"] == to_id
+                and (connection_type is None or r["connection_type"] == connection_type)
+            )
         ]
         if len(data["relations"]) < initial_count:
             self._write_data(data)
@@ -152,9 +175,9 @@ class ORJSONLexicon(Lexicon):
 
     def _check_relation_in_data(self, data: Dict, relation: Relation) -> bool:
         return any(
-            r["from_id"] == relation.from_id and 
-            r["to_id"] == relation.to_id and 
-            r["connection_type"] == relation.connection_type
+            r["from_id"] == relation.from_id
+            and r["to_id"] == relation.to_id
+            and r["connection_type"] == relation.connection_type
             for r in data["relations"]
         )
 
@@ -165,8 +188,12 @@ class ORJSONLexicon(Lexicon):
             content=d["content"],
             tags=d["tags"],
             category=d["category"],
-            created_at=datetime.fromisoformat(d["created_at"]) if isinstance(d["created_at"], str) else d["created_at"],
-            updated_at=datetime.fromisoformat(d["updated_at"]) if isinstance(d["updated_at"], str) else d["updated_at"],
+            created_at=datetime.fromisoformat(d["created_at"])
+            if isinstance(d["created_at"], str)
+            else d["created_at"],
+            updated_at=datetime.fromisoformat(d["updated_at"])
+            if isinstance(d["updated_at"], str)
+            else d["updated_at"],
             metadata=d.get("metadata", {}),
         )
 

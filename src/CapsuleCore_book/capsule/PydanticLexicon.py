@@ -7,9 +7,10 @@ from pathlib import Path
 from .Lexicon import Lexicon
 from ..core import Entry, Relation
 
+
 class EntrySchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     title: Optional[str]
     content: str
@@ -19,18 +20,22 @@ class EntrySchema(BaseModel):
     updated_at: datetime
     metadata: Dict[str, Any] = {}
 
+
 class RelationSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     from_id: str
     to_id: str
     connection_type: str
     metadata: Dict[str, Any] = {}
 
+
 class CodexStorageSchema(BaseModel):
     """Esquema de la base de datos completa"""
+
     entries: Dict[str, EntrySchema] = {}
     relations: List[RelationSchema] = []
+
 
 class PydanticLexicon(Lexicon):
     def __init__(self, storage_path: str = "codex_pydantic.json"):
@@ -46,12 +51,12 @@ class PydanticLexicon(Lexicon):
         try:
             if not self.storage_path.exists():
                 return CodexStorageSchema()
-            
+
             with open(self.storage_path, "r", encoding="utf-8") as f:
                 raw_data = json.load(f)
                 # La magia: Valida toda la estructura al leer
                 return CodexStorageSchema(**raw_data)
-        except (json.JSONDecodeError, FileNotFoundError, Exception):
+        except json.JSONDecodeError, FileNotFoundError, Exception:
             return CodexStorageSchema()
 
     def _write_data(self, storage: CodexStorageSchema):
@@ -64,10 +69,10 @@ class PydanticLexicon(Lexicon):
 
     def save(self, entry: Entry) -> None:
         storage = self._read_data()
-        
+
         # Convertimos Dataclass -> Pydantic Model
         entry_schema = EntrySchema.model_validate(entry)
-        
+
         storage.entries[entry.id] = entry_schema
         self._write_data(storage)
 
@@ -86,9 +91,9 @@ class PydanticLexicon(Lexicon):
     def check_relation(self, relation: Relation) -> bool:
         storage = self._read_data()
         return any(
-            r.from_id == relation.from_id and 
-            r.to_id == relation.to_id and 
-            r.connection_type == relation.connection_type
+            r.from_id == relation.from_id
+            and r.to_id == relation.to_id
+            and r.connection_type == relation.connection_type
             for r in storage.relations
         )
 
@@ -99,10 +104,11 @@ class PydanticLexicon(Lexicon):
 
         # Limpieza de relaciones
         storage.relations = [
-            r for r in storage.relations 
+            r
+            for r in storage.relations
             if r.from_id != entry_id and r.to_id != entry_id
         ]
-        
+
         del storage.entries[entry_id]
         self._write_data(storage)
         return True
@@ -118,7 +124,8 @@ class PydanticLexicon(Lexicon):
         storage = self._read_data()
         return [
             self._map_to_core_entry(storage.entries[eid])
-            for eid in entry_ids if eid in storage.entries
+            for eid in entry_ids
+            if eid in storage.entries
         ]
 
     def get_by_tag(self, tag: str) -> List[Entry]:
@@ -161,19 +168,22 @@ class PydanticLexicon(Lexicon):
             if r.from_id == entry_id
         ]
 
-    def delete_relation(self, from_id: str, to_id: str, connection_type: Optional[str] = None) -> bool:
+    def delete_relation(
+        self, from_id: str, to_id: str, connection_type: Optional[str] = None
+    ) -> bool:
         storage = self._read_data()
         initial_count = len(storage.relations)
-        
+
         storage.relations = [
-            r for r in storage.relations
+            r
+            for r in storage.relations
             if not (
-                r.from_id == from_id and 
-                r.to_id == to_id and 
-                (connection_type is None or r.connection_type == connection_type)
+                r.from_id == from_id
+                and r.to_id == to_id
+                and (connection_type is None or r.connection_type == connection_type)
             )
         ]
-        
+
         if len(storage.relations) < initial_count:
             self._write_data(storage)
             return True
@@ -188,5 +198,5 @@ class PydanticLexicon(Lexicon):
     def _map_to_core_relation(self, schema: RelationSchema) -> Relation:
         return Relation(**schema.model_dump())
 
-    # Los métodos get_by_tag, get_by_category, etc. 
+    # Los métodos get_by_tag, get_by_category, etc.
     # siguen la misma lógica filtrando sobre storage.entries.values()
