@@ -1,6 +1,6 @@
 [project]
-name = "CapsuleCore_book"
-version = "0.8.0"
+name = "cc.book-kit"
+version = "0.9.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -15,7 +15,7 @@ dependencies = [
 
 [[tool.uv.index]]
 name = "github"
-url = "https://pypi.pkg.github.com/Rick-torrellas/CapsuleCore_book"
+url = "https://pypi.pkg.github.com/Rick-torrellas/cc-book-kit"
 publish = true
 
 [tool.setuptools.packages.find]
