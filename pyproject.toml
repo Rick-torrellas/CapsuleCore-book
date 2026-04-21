@@ -12,15 +12,3 @@ dependencies = [
     "ruff>=0.15.7",
     "ujson>=5.12.0",
 ]
-
-[[tool.uv.index]]
-name = "github"
-url = "https://pypi.pkg.github.com/Rick-torrellas/cc-book-kit"
-publish = true
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"

@@ -1,7 +1,8 @@
 # Cargar variables desde el archivo .env si existe
 set dotenv-load := true
 
-app_dir := "cc-book-kit"
+export APP_DIR := file_name(invocation_directory())
+export PARENT_DIR := "taller"
 
 # Comando por defecto
 default:
@@ -9,12 +10,15 @@ default:
 # para construir el paquete
 build:
     uv build
+
 # para publicar el paquete en PyPI
 publish:
     uv publish
+
 # Run the test suite with verbose output using pytest
 test:
-	uv run pytest -v  
+	uv run --active pytest -v  --showlocals
+
 # Run all code quality checks (formatting and linting)
 check: format-check lint-check
 # Check code formatting compliance without making changes
@@ -38,9 +42,11 @@ changelog:
 # Sincronizar con rclone, hacer commit y push a GitHub
 push:
     #!/usr/bin/env bash
-    set -e  # Detener el script si un comando falla
 
-    rclone sync . gd-ricardo:taller/{{app_dir}} --exclude-from ./rcloneignore.txt --progress -v 
+    # Detener el script si un comando falla
+    set -e  
+
+    rclone sync . gd-ricardo:{{PARENT_DIR}}/{{APP_DIR}} --exclude-from ./rcloneignore.txt --progress -v 
 
     read -p "Mensaje de commit (Required): " req
 
